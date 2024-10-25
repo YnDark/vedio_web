@@ -1,5 +1,7 @@
 <template>
-    <div></div>
+  <div class="outter"></div>
 </template>
 <style>
+.outter {
+}
 </style>
