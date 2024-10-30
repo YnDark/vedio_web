@@ -1,21 +1,22 @@
 <template>
   <div class="outter">
-    <span class="icon-24gl-star"></span><span class="userImg" src="" />
+    <span class="userImg" />
   </div>
 </template>
 <script setup lang="ts">
 import '../../assets/font_4124176_g7539sgz4ff/iconfont.css'
 </script>
-<style scoped lang="less">
+<style scoped lang="scss">
 .outter {
-  float: right;
   width: 200px;
+  float: right;
   height: 50px;
-  border: 1px solid #ccc;
+  border: 2px solid #ccc;
   margin-top: 10px;
   border-radius: 20px;
   position: fixed;
-  left: 70vw;
+  z-index: 100;
+  right: 10px;
   .icon-24gl-star {
     position: relative;
     left: 120px;

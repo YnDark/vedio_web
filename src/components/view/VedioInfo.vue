@@ -1,89 +1,110 @@
 <template>
-  更新日期
-  <div class="selectedDate">
-    <select  v-model="selectDate">
-      <option :value="ix" v-for="(date, ix) in data">{{ date.date }}</option>
-    </select>
-  </div>
-  <div class="outter"> 
-    <div v-for="(item, index) in data" :key="index">
-      <div class="show" v-if="selectDate === index">
-        <span class="card" @click="jump()" v-for="(update, idx) in item.updates" :key="idx">
-          <img :src="update.cover_url" :alt="update.cover_url">
-          <p>{{ update.title }}</p>
-          <span>{{ update.update_time }}</span>
-        </span>
-      </div>
+  <div class="outter" v-if="isReady && useMainStore().selectTab==='1'">
+    <div class="show">
+      <span
+        v-for="(item, index) in data"
+        :key="index"
+        class="card"
+        @click="jump(item.uri)"
+      >
+        <img class="vedio" :src="item.pic" :href="item.uri" />
+        <p class="title" v-if="item.title.length > 15">
+          {{ item.title.slice(0, 14) + '...' }}
+        </p>
+        <p class="title" v-if="item.title.length <= 15">{{ item.title }}</p>
+        <div class="ownerCard">
+          <img class="owner" :src="item.owner.face" alt="" />
+          <p class="ownerName">{{ item.owner.name }}</p>
+        </div>
+        <span class="bottom">播放量：{{ item.stat.view }}</span>
+        <span class="bottom">点赞量：{{ item.stat.like }}</span>
+      </span>
     </div>
   </div>
 </template>
 <script lang="ts" setup>
-import { onMounted } from 'vue'
+import { computed, onMounted } from 'vue'
 import axios from 'axios'
 import { ref } from 'vue'
+import {useMainStore} from '../store'
+
+interface stat {
+  danmaku: Number
+  like: Number
+  view: Number
+  vt: Number
+}
+interface owner {
+  name: string
+  face: string
+}
 
 interface UpdateItem {
-  cover_url: any;
-  title: string;
-  update_time: string;
-  update_to: string;
+  bvid: string
+  dislike_switch: Number
+  dislike_switch_pc: Number
+  duration: Number
+  enable_vt: Number
+  goto: 'av'
+  pic: string
+  cuttedPic?: string | null
+  title: string
+  uri: string
+  is_followed: Number
+  is_stock: Number
+  id: Number
+  owner: owner
+  pic_4_3: string
+  pubdate: Number
+  track_id: string
+  stat: stat
 }
 
-interface AnimeItem {
-  date: string;
-  day_of_week: string;
-  is_today: boolean;
-  updates: UpdateItem[];
+let data = ref<UpdateItem[]>([])
+function jump(event: string) {
+  window.open(event)
 }
+let isReady = ref<Boolean>(false)
 
-let data = ref<AnimeItem[]>([]);
-let selectDate = ref<Number>(0) 
-function jump(){
-  console.log("jump")
-}
+let page = 0;
 onMounted(async () => {
-  console.log(`The component is now onMounted.`);
-  await axios.get('http://127.0.0.1:6001/anime/bangumi/updates').then((res) => {
-    data.value = res.data;
-  }).catch((err) => {
-    console.log(err);
-  })
-  console.log(data.value);
+
+  let Auth =
+    "SESSDATA=a9cf665e%2C1745759857%2C2a69b%2Aa2CjDstqzaf9KiMh89ZNtidXLDAeZkiM7t9xXkHB8sURGGyWKX6WHywaKgbyZuafbQ4xYSVndDcC12Q2xOR3lLUkRWNVpnakJxOHRVMzZ0OGw4OHlqTUsweWVFWlhadVpvWDI1RU9RRHpnTkdfTWFLV0szU3VUQXhkT1UyOUVnTGhaRWZfNHplTFpnIIEC;buvid3=3A082D63-7D49-F637-58F8-52B28FCD116D08737infoc; b_nut=1729352208; _uuid=D105AA996-B4FE-F2E5-ED9F-593D2C109B23710868infoc; CURRENT_FNVAL=4048; rpdid=|(k)~RYml~lY0J'u~kmJlkkuk; DedeUserID=14551198; DedeUserID__ckMd5=fc8f8c8cc5957c60; header_theme_version=CLOSE; enable_web_push=DISABLE; hit-dyn-v2=1; fingerprint=7d889acd0b9d6ea8fa18d138dc9a183f; buvid_fp_plain=undefined; buvid4=4953F96A-A683-78DA-6A0E-D65270B01E7011402-024101915-6tN5RoR9B6bNcAiU%2FwwN3w%3D%3D; bp_t_offset_14551198=991703615024398336; CURRENT_QUALITY=120; bili_ticket=eyJhbGciOiJIUzI1NiIsImtpZCI6InMwMyIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MzAzNDkzMjMsImlhdCI6MTczMDA5MDA2MywicGx0IjotMX0.rDBUJyzmoDBoXkDF8KGd3rC0VFjU7_B6oITeK9fny14; bili_ticket_expires=1730349263; buvid_fp=7d889acd0b9d6ea8fa18d138dc9a183f; SESSDATA=a9cf665e%2C1745759857%2C2a69b%2Aa2CjDstqzaf9KiMh89ZNtidXLDAeZkiM7t9xXkHB8sURGGyWKX6WHywaKgbyZuafbQ4xYSVndDcC12Q2xOR3lLUkRWNVpnakJxOHRVMzZ0OGw4OHlqTUsweWVFWlhadVpvWDI1RU9RRHpnTkdfTWFLV0szU3VUQXhkT1UyOUVnTGhaRWZfNHplTFpnIIEC; bili_jct=d3a5320ef79c97639d5f9202211e6353; sid=7h56l6kc; home_feed_column=5; browser_resolution=2552-1314; b_lsid=34781BA9_192DC06B7CF; theme_style=light"
+  document.cookie = Auth
+  await getVedio(page);
+  await getVedio(page);
+  await getVedio(page);
 })
+async function getVedio(page:any){
+  axios
+    .get('/x/web-interface/index/top/rcmd',{
+      params:{
+        fresh_idx:page
+      },
+      withCredentials: true,
+    })
+    .then(res => {
+      console.log(res)
+      console.log(data.value.length)
+      if(data.value.length>0){
+        console.log(data.value)
+        console.log(res.data.data.item)
+        data.value.push(...res.data.data.item)
+      }
+      else{
+        console.log(data.value)
+        data.value=res.data.data.item
+      }
+      isReady.value = true
+      page++
+    })
+    .catch(err => {
+      console.log(err)
+    })
+}
 </script>
 <style lang="less" scoped>
-.selectedDate {
-  display: inline-block;
-  width: 200px;
-  position: relative;
-  vertical-align: middle;
-  padding: 0;
-  overflow: hidden;
-  background-color: #fff;
-  color: #555;
-  border: 1px solid #aaa;
-  text-shadow: none;
-  border-radius: 4px;	
-  transition: box-shadow 0.25s ease;
-  z-index: 2;
-  margin: 10px 10px;
-}
-.selectedDate:hover {
-  opacity: 80%;
-}
-
-.selectedDate select {
-  cursor: pointer;
-  padding: 10px;
-  width: 100%;
-  border: none;
-  background: transparent;
-  background-image: none;
-}
-
-.selectedDate select:focus {
-  outline: none;
-}
 .outter {
   width: 100%;
   height: 100%;
@@ -93,19 +114,37 @@ onMounted(async () => {
     flex-wrap: wrap;
     justify-content: center;
     align-items: center;
-    .card{
+    .card {
+      .ownerCard {
+        width: 200px;
+        padding-left: 20px;
+      }
       text-align: center;
       // border: #ccc 1px solid;
-      padding: 30px 10px;
-      width: 200px;
-      height: 300px;
-      img {
-        width: 100px;
+      padding: 10px 10px;
+      width: 350px;
+      height: 350px;
+      position: relative;
+      .vedio {
+        width: 300px;
         border-radius: 10px;
         margin: 10px 10px;
+        max-height: 150px;
+        min-height: 180px;
+        overflow: hidden;
+      }
+      .ownerName {
+        margin: 20px 0;
+      }
+      .owner {
+        border-radius: 40px;
+        width: 40px;
+        position: absolute;
+        left: 20px;
+        bottom: 50px;
       }
     }
-    .card:hover{
+    .card:hover {
       opacity: 80%;
       background-color: #515151;
       transition: 0.2s linear;
@@ -113,5 +152,14 @@ onMounted(async () => {
     }
   }
 }
-
+.title {
+  color: white;
+  font-size: 16px;
+  margin: 10px 10px;
+}
+.bottom {
+  bottom: 10px;
+  font-size: 12px;
+  margin: 10px 10px;
+}
 </style>
