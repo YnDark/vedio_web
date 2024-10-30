@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import '../../assets/font_4124176_g7539sgz4ff/iconfont.css'
+import '../icons/font_4124176_kflw0627fgs/iconfont.css'
 import axios from 'axios'
 import { onMounted, ref } from 'vue'
 import {useMainStore} from '../store'
@@ -38,7 +38,7 @@ async function searchVedio() {
 }
 async function getSearchRes(){
   await axios
-    .get('/x/web-interface/wbi/search/all/v2', {
+    .get('/Bew/x/web-interface/wbi/search/all/v2', {
       params: {
         keyword: searchValue.value,
         page: page,

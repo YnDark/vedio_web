@@ -4,7 +4,6 @@
   </div>
 </template>
 <script setup lang="ts">
-import '../../assets/font_4124176_g7539sgz4ff/iconfont.css'
 </script>
 <style scoped lang="scss">
 .outter {

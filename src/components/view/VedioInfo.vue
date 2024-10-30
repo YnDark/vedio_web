@@ -78,7 +78,7 @@ onMounted(async () => {
 })
 async function getVedio(page:any){
   axios
-    .get('/x/web-interface/index/top/rcmd',{
+    .get('/Bew/x/web-interface/index/top/rcmd',{
       params:{
         fresh_idx:page
       },
