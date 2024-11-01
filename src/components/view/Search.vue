@@ -4,10 +4,12 @@ import axios from 'axios'
 import { onMounted, ref } from 'vue'
 import {useMainStore} from '../store'
 import { computed } from '@vue/reactivity';
+import pubsub from 'pubsub-js';
 let searchValue = ref<string>('')
-interface result {
-  result_type: string
-  data: searchdata[]
+interface tag {
+  name:string
+  spid:string
+  value:string
 }
 interface searchdata {
   arcurl: string
@@ -21,14 +23,36 @@ interface searchdata {
   video_review: Number
   like: Number
 }
+let searchSuggest = ref<tag[]>([])
 let data = ref<searchdata[]>([])
 let isReady = ref<Boolean>(false)
+let isShow = ref<Boolean>(false)
 let selectType = computed(()=>{
   return useMainStore().selectTab
 })
 let page = 1;
 function jump(event: string){
   window.open(event);
+}
+async function suggestVedio(){
+  await axios.get("/search/main/suggest",
+  {
+    withCredentials: true,
+    params:{
+      term:searchValue.value
+    }
+  })
+  .then((res)=>{
+    searchSuggest.value = res.data.result.tag;
+    console.log(searchSuggest.value);
+  })
+  .catch((err)=>{
+    console.log(err)
+  })
+  isShow.value = true;
+}
+function blurFunc(){
+  isShow.value = false;
 }
 async function searchVedio() {
   useMainStore().changeTab("2");
@@ -61,25 +85,30 @@ async function getSearchRes(){
       console.log(err)
     })
 }
+onMounted(()=>{
+  pubsub.subscribe('refresh',()=>{
+    if(useMainStore().selectTab == "2"){
+      searchVedio();
+    }
+  });
+})
 </script>
 <template>
   <div class="outter">
-    <input
+    <div class="conbination">
+      <input
       type="text"
       placeholder="搜索"
       v-model="searchValue"
+      @blur="blurFunc()"
       v-on:keyup.enter="searchVedio()"
-      class="iconfont icon-sousuo"
+      v-on:keyup.space="suggestVedio()"
     />
-    <!-- 搜索类型
-    <div class="selectType">
-      <select v-model="selectType">
-        <option :value="ix" v-for="(type, ix) in data">
-          {{ type.result_type }}
-        </option>
-      </select>
-    </div> -->
-
+    <span class="iconfont icon-sousuo"></span>
+  </div>
+  <div class="suggest" :isShow @touchmove.prevent @mousewheel.prevent @blur="blurFunc()" v-show="isShow === true">
+    <p v-for="(i,index) in searchSuggest" :key="index">{{ i.value }}</p>
+  </div>
     <div class="show"  v-if="selectType === '2'">
       <!-- v-for="(item, index) in data" :key="index"  -->
       <span v-for="(v, id) in data" :key="id" class="card" @click="jump(v.arcurl)">
@@ -105,19 +134,51 @@ async function getSearchRes(){
 </template>
 
 <style scoped lang="less">
+.suggest{
+  position: relative;
+  margin: 0 auto;
+  z-index: 210;
+  background-color: rgb(54, 54, 60);
+  width: 50vw;
+  border: 1px solid white;
+  border-radius: 10px;
+  text-align: left;
+  p {
+    padding: 5px 10px;
+    cursor: pointer;
+  }
+  p:hover {
+    background-color: white;
+    transition: 0.3s linear;
+    color:black
+  }
+}
 .outter {
   height: 100px;
+  .iconfont{
+    left: 10px;
+    position: absolute;
+    top: 13px;
+    left: 20px;
+    color: black;
+  }
   text-align: center;
+  .conbination{
+    position: relative;
+    width: max-content;
+    margin: 0 auto;
+  }
   input {
     height: 50px;
     width: 50vw;
     position: relative;
     border-radius: 10px;
-    padding-left: 20px;
+    padding-left: 45px;
+    font-size: 16px;
     color: black;
   }
   input:hover {
-    opacity: 80%;
+    box-shadow: 0px 0px 5px white;
     transition: 0.1s linear;
   }
   .vedio {

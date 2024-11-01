@@ -12,5 +12,6 @@ import Activity from '../view/Activity.vue';
 <style lang="less" scoped>
 .outter {
   width: 100%;
+  padding: 0 3vw;
 }
 </style>

@@ -1,5 +1,5 @@
 <template>
-  <div class="outter" v-if="isReady && useMainStore().selectTab==='1'">
+  <div class="outter" v-if="isReady && useMainStore().selectTab==='1'||useMainStore().selectTab==='4'">
     <div class="show">
       <span
         v-for="(item, index) in data"
@@ -8,16 +8,15 @@
         @click="jump(item.uri)"
       >
         <img class="vedio" :src="item.pic" :href="item.uri" />
-        <p class="title" v-if="item.title.length > 15">
-          {{ item.title.slice(0, 14) + '...' }}
-        </p>
-        <p class="title" v-if="item.title.length <= 15">{{ item.title }}</p>
+        <div class="info">
+        <p class="title">{{ item.title.length>13?item.title.slice(0,12)+"...":item.title }}</p>
         <div class="ownerCard">
           <img class="owner" :src="item.owner.face" alt="" />
           <p class="ownerName">{{ item.owner.name }}</p>
         </div>
-        <span class="bottom">播放量：{{ item.stat.view }}</span>
-        <span class="bottom">点赞量：{{ item.stat.like }}</span>
+          <span class="bottom">播放量：{{ item.stat.view.toString().length>=5?item.stat.view.toString().slice(0,-4)+"万":item.stat.view }}</span>
+          <span class="bottom">点赞量：{{ item.stat.like.toString().length>=5?item.stat.like.toString().slice(0,-4)+"万":item.stat.like }}</span>
+        </div>
       </span>
     </div>
   </div>
@@ -27,6 +26,7 @@ import { computed, onMounted } from 'vue'
 import axios from 'axios'
 import { ref } from 'vue'
 import {useMainStore} from '../store'
+import pubsub from 'pubsub-js';
 
 interface stat {
   danmaku: Number
@@ -38,7 +38,6 @@ interface owner {
   name: string
   face: string
 }
-
 interface UpdateItem {
   bvid: string
   dislike_switch: Number
@@ -66,18 +65,30 @@ function jump(event: string) {
 }
 let isReady = ref<Boolean>(false)
 
-let page = 0;
+let page:number = 1;
+async function getAllVedio(){
+  await getVedio();
+  await getVedio();
+  await getVedio();
+  await getVedio();
+}
 onMounted(async () => {
-
   let Auth =
-    "SESSDATA=a9cf665e%2C1745759857%2C2a69b%2Aa2CjDstqzaf9KiMh89ZNtidXLDAeZkiM7t9xXkHB8sURGGyWKX6WHywaKgbyZuafbQ4xYSVndDcC12Q2xOR3lLUkRWNVpnakJxOHRVMzZ0OGw4OHlqTUsweWVFWlhadVpvWDI1RU9RRHpnTkdfTWFLV0szU3VUQXhkT1UyOUVnTGhaRWZfNHplTFpnIIEC;buvid3=3A082D63-7D49-F637-58F8-52B28FCD116D08737infoc; b_nut=1729352208; _uuid=D105AA996-B4FE-F2E5-ED9F-593D2C109B23710868infoc; CURRENT_FNVAL=4048; rpdid=|(k)~RYml~lY0J'u~kmJlkkuk; DedeUserID=14551198; DedeUserID__ckMd5=fc8f8c8cc5957c60; header_theme_version=CLOSE; enable_web_push=DISABLE; hit-dyn-v2=1; fingerprint=7d889acd0b9d6ea8fa18d138dc9a183f; buvid_fp_plain=undefined; buvid4=4953F96A-A683-78DA-6A0E-D65270B01E7011402-024101915-6tN5RoR9B6bNcAiU%2FwwN3w%3D%3D; bp_t_offset_14551198=991703615024398336; CURRENT_QUALITY=120; bili_ticket=eyJhbGciOiJIUzI1NiIsImtpZCI6InMwMyIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MzAzNDkzMjMsImlhdCI6MTczMDA5MDA2MywicGx0IjotMX0.rDBUJyzmoDBoXkDF8KGd3rC0VFjU7_B6oITeK9fny14; bili_ticket_expires=1730349263; buvid_fp=7d889acd0b9d6ea8fa18d138dc9a183f; SESSDATA=a9cf665e%2C1745759857%2C2a69b%2Aa2CjDstqzaf9KiMh89ZNtidXLDAeZkiM7t9xXkHB8sURGGyWKX6WHywaKgbyZuafbQ4xYSVndDcC12Q2xOR3lLUkRWNVpnakJxOHRVMzZ0OGw4OHlqTUsweWVFWlhadVpvWDI1RU9RRHpnTkdfTWFLV0szU3VUQXhkT1UyOUVnTGhaRWZfNHplTFpnIIEC; bili_jct=d3a5320ef79c97639d5f9202211e6353; sid=7h56l6kc; home_feed_column=5; browser_resolution=2552-1314; b_lsid=34781BA9_192DC06B7CF; theme_style=light"
+    "buvid3=3A082D63-7D49-F637-58F8-52B28FCD116D08737infoc; b_nut=1729352208; _uuid=D105AA996-B4FE-F2E5-ED9F-593D2C109B23710868infoc; CURRENT_FNVAL=4048; rpdid=|(k)~RYml~lY0J'u~kmJlkkuk; DedeUserID=14551198; DedeUserID__ckMd5=fc8f8c8cc5957c60; header_theme_version=CLOSE; enable_web_push=DISABLE; hit-dyn-v2=1; fingerprint=7d889acd0b9d6ea8fa18d138dc9a183f; buvid_fp_plain=undefined; buvid4=4953F96A-A683-78DA-6A0E-D65270B01E7011402-024101915-6tN5RoR9B6bNcAiU%2FwwN3w%3D%3D; bp_t_offset_14551198=991703615024398336; CURRENT_QUALITY=120; buvid_fp=7d889acd0b9d6ea8fa18d138dc9a183f; SESSDATA=a9cf665e%2C1745759857%2C2a69b%2Aa2CjDstqzaf9KiMh89ZNtidXLDAeZkiM7t9xXkHB8sURGGyWKX6WHywaKgbyZuafbQ4xYSVndDcC12Q2xOR3lLUkRWNVpnakJxOHRVMzZ0OGw4OHlqTUsweWVFWlhadVpvWDI1RU9RRHpnTkdfTWFLV0szU3VUQXhkT1UyOUVnTGhaRWZfNHplTFpnIIEC; bili_jct=d3a5320ef79c97639d5f9202211e6353; sid=81hua2o3; bili_ticket=eyJhbGciOiJIUzI1NiIsImtpZCI6InMwMyIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MzA2MDk0OTAsImlhdCI6MTczMDM1MDIzMCwicGx0IjotMX0.1nzY8ZMUfxNRX_CrR8Asq5XfLWJw6wfkmsE061J_g4U; bili_ticket_expires=1730609430; b_lsid=2A3C6999_192E1124739; home_feed_column=5; browser_resolution=1807-1314; theme_style=light"
   document.cookie = Auth
-  await getVedio(page);
-  await getVedio(page);
-  await getVedio(page);
+  await getAllVedio();
+  pubsub.subscribe('refresh',async()=>{
+    if(useMainStore().selectTab == "1"){
+      getAllVedio();
+    }
+    else if(useMainStore().selectTab == "4"){
+      data.value = [];
+      await getAllVedio();
+    }
+  });
 })
-async function getVedio(page:any){
-  axios
+async function getVedio(){
+  await axios
     .get('/Bew/x/web-interface/index/top/rcmd',{
       params:{
         fresh_idx:page
@@ -86,7 +97,6 @@ async function getVedio(page:any){
     })
     .then(res => {
       console.log(res)
-      console.log(data.value.length)
       if(data.value.length>0){
         console.log(data.value)
         console.log(res.data.data.item)
@@ -97,6 +107,7 @@ async function getVedio(page:any){
         data.value=res.data.data.item
       }
       isReady.value = true
+      console.log(page)
       page++
     })
     .catch(err => {
@@ -106,6 +117,7 @@ async function getVedio(page:any){
 </script>
 <style lang="less" scoped>
 .outter {
+  z-index: 0;
   width: 100%;
   height: 100%;
   // border: #ccc solid 1px;
@@ -115,6 +127,18 @@ async function getVedio(page:any){
     justify-content: center;
     align-items: center;
     .card {
+      .title {
+        color: white;
+        text-overflow: ellipsis;
+        font-size: 16px;
+        max-height: 25px;
+        margin: 10px 10px;
+        overflow: hidden;
+      }
+      .info{
+        padding: 0 50px;
+        text-align: center;
+      }
       .ownerCard {
         width: 200px;
         padding-left: 20px;
@@ -134,6 +158,7 @@ async function getVedio(page:any){
         overflow: hidden;
       }
       .ownerName {
+        text-align: left;
         margin: 20px 0;
       }
       .owner {
@@ -152,11 +177,7 @@ async function getVedio(page:any){
     }
   }
 }
-.title {
-  color: white;
-  font-size: 16px;
-  margin: 10px 10px;
-}
+
 .bottom {
   bottom: 10px;
   font-size: 12px;

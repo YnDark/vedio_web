@@ -40,8 +40,10 @@ let changeSelect = function(index){
     cursor: pointer;
     background-color: #181818;
     color: white;
+    transition: 0.4s linear;
   }
   span:hover {
+    box-shadow: 0px 0px 5px white;
     opacity: 80%;
   }
 }
