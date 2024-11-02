@@ -3,7 +3,7 @@
     <span><img class="tixing" :src="tixing"></span>
     <span class="line"></span>
     <span class="iconfont icon-24gl-star"></span>
-    <img class="userImg" src='../../assets/1726290689529.jpg' />
+    <img class="userImg" src='../../assets/IMG_20241102_101642.jpg' />
   </div>
 </template>
 <script setup lang="ts">

@@ -13,6 +13,7 @@ function home(){
     useMainStore().changeTab("4");
     scrollToTop()
     refresh()
+    useMainStore().changeTab("1");
 }
 function refresh(){
     pubsub.publish('refresh');

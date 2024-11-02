@@ -4,25 +4,9 @@ import axios from 'axios'
 import { onMounted, ref } from 'vue'
 import {useMainStore} from '../store'
 import { computed } from '@vue/reactivity';
-import pubsub from 'pubsub-js';
+import pubsub from 'pubsub-js'; 
+import {tag,searchdata} from '../interface/index'
 let searchValue = ref<string>('')
-interface tag {
-  name:string
-  spid:string
-  value:string
-}
-interface searchdata {
-  arcurl: string
-  author: string
-  bvid: string
-  description: string
-  pic: string
-  title: string
-  tag: string
-  upic: string
-  video_review: Number
-  like: Number
-}
 let searchSuggest = ref<tag[]>([])
 let data = ref<searchdata[]>([])
 let isReady = ref<Boolean>(false)
@@ -33,6 +17,12 @@ let selectType = computed(()=>{
 let page = 1;
 function jump(event: string){
   window.open(event);
+} 
+async function foundByclick(item:tag){
+  searchValue.value = item.value;
+  console.log(item)
+  searchVedio()
+  isShow.value = false;
 }
 async function suggestVedio(){
   await axios.get("/search/main/suggest",
@@ -93,21 +83,23 @@ onMounted(()=>{
   });
 })
 </script>
+
 <template>
-  <div class="outter">
-    <div class="conbination">
-      <input
-      type="text"
-      placeholder="搜索"
-      v-model="searchValue"
-      @blur="blurFunc()"
-      v-on:keyup.enter="searchVedio()"
-      v-on:keyup.space="suggestVedio()"
-    />
-    <span class="iconfont icon-sousuo"></span>
-  </div>
-  <div class="suggest" :isShow @touchmove.prevent @mousewheel.prevent @blur="blurFunc()" v-show="isShow === true">
-    <p v-for="(i,index) in searchSuggest" :key="index">{{ i.value }}</p>
+  <div @blur="blurFunc()">
+    <div class="outter">
+      <div class="conbination">
+        <input
+        type="text"
+        placeholder="搜索"
+        v-model="searchValue"
+        v-on:keyup.enter="searchVedio()"
+        v-on:keyup.space="suggestVedio()"
+      />
+      <span class="iconfont icon-sousuo"></span>
+    </div>
+    <div class="suggest" :isShow @touchmove.prevent @mousewheel.prevent v-show="isShow === true">
+      <p v-for="(i,index) in searchSuggest" :key="index" @click="foundByclick(i)">{{ i.value }}</p>
+    </div>
   </div>
     <div class="show"  v-if="selectType === '2'">
       <!-- v-for="(item, index) in data" :key="index"  -->

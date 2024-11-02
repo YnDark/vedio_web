@@ -6,12 +6,17 @@ import Switch from '../view/Switch.vue'
 <template>
   <div class="outter">
     <UserInfo></UserInfo>
-    <Search></Search>
+    <div class="s">
+      <Search></Search>
+    </div>
     <Switch></Switch>
   </div>
 </template>
 <style lang="less" scoped>
 .outter {
   margin-bottom: 30px;
+}
+.s{
+  padding: 0 3vw;
 }
 </style>
